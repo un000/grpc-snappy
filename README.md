@@ -16,7 +16,7 @@ At the client use DialOptions:
     }
 
     conn, err := grpc.Dial(
-        "you-grpc-address:port",
+        "your-grpc-address:port",
         dialOpts...,
     )
 ```
