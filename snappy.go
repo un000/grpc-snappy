@@ -16,11 +16,11 @@ func init() {
 }
 
 var (
-	cmpMu   sync.Mutex
+	cmpMu sync.Mutex
 	// cmpPool stores writers
 	cmpPool sync.Pool
 
-	dcmpMu   sync.Mutex
+	dcmpMu sync.Mutex
 	// dcmpPool stores readers
 	dcmpPool sync.Pool
 )
@@ -38,9 +38,8 @@ func (c *compressor) Compress(w io.Writer) (io.WriteCloser, error) {
 	cmpMu.Unlock()
 	if !inPool {
 		return &writeCloser{Writer: snappy.NewBufferedWriter(w)}, nil
-	} else {
-		wr.Reset(w)
 	}
+	wr.Reset(w)
 
 	return wr, nil
 }
@@ -51,9 +50,8 @@ func (c *compressor) Decompress(r io.Reader) (io.Reader, error) {
 	dcmpMu.Unlock()
 	if !inPool {
 		return &reader{Reader: snappy.NewReader(r)}, nil
-	} else {
-		dr.Reset(r)
 	}
+	dr.Reset(r)
 
 	return dr, nil
 }
