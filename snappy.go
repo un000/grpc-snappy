@@ -16,11 +16,8 @@ func init() {
 }
 
 var (
-	cmpMu sync.Mutex
 	// cmpPool stores writers
 	cmpPool sync.Pool
-
-	dcmpMu sync.Mutex
 	// dcmpPool stores readers
 	dcmpPool sync.Pool
 )
@@ -33,9 +30,7 @@ func (c *compressor) Name() string {
 }
 
 func (c *compressor) Compress(w io.Writer) (io.WriteCloser, error) {
-	cmpMu.Lock()
 	wr, inPool := cmpPool.Get().(*writeCloser)
-	cmpMu.Unlock()
 	if !inPool {
 		return &writeCloser{Writer: snappy.NewBufferedWriter(w)}, nil
 	}
@@ -45,9 +40,7 @@ func (c *compressor) Compress(w io.Writer) (io.WriteCloser, error) {
 }
 
 func (c *compressor) Decompress(r io.Reader) (io.Reader, error) {
-	dcmpMu.Lock()
 	dr, inPool := dcmpPool.Get().(*reader)
-	dcmpMu.Unlock()
 	if !inPool {
 		return &reader{Reader: snappy.NewReader(r)}, nil
 	}
@@ -62,10 +55,9 @@ type writeCloser struct {
 
 func (w *writeCloser) Close() error {
 	defer func() {
-		cmpMu.Lock()
 		cmpPool.Put(w)
-		cmpMu.Unlock()
 	}()
+
 	return w.Writer.Close()
 }
 
@@ -76,9 +68,8 @@ type reader struct {
 func (r *reader) Read(p []byte) (n int, err error) {
 	n, err = r.Reader.Read(p)
 	if err == io.EOF {
-		dcmpMu.Lock()
 		dcmpPool.Put(r)
-		dcmpMu.Unlock()
 	}
+
 	return n, err
 }
