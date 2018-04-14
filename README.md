@@ -8,11 +8,7 @@ At the client use DialOptions:
 ```
     var dialOpts = []grpc.DialOption{
         grpc.WithInsecure(),
-    }
-
-    if *UseCompressor {
-        // here it is
-        dialOpts = append(dialOpts, grpc.WithDefaultCallOptions(grpc.UseCompressor(snappy.Name)))
+        grpc.WithDefaultCallOptions(grpc.UseCompressor(snappy.Name)),
     }
 
     conn, err := grpc.Dial(
@@ -21,5 +17,5 @@ At the client use DialOptions:
     )
 ```
 
-For more information visit the official docs:
+For more information, please visit the official docs:
     https://github.com/grpc/grpc-go/blob/master/Documentation/compression.md
